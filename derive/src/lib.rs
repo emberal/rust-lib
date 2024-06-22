@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{DeriveInput, parse_macro_input};
+use syn::{parse_macro_input, DeriveInput};
 
 #[proc_macro_derive(IntoResponse)]
 pub fn into_response_derive(input: TokenStream) -> TokenStream {
@@ -16,7 +16,9 @@ fn into_response_derive_impl(input: DeriveInput) -> TokenStream {
     let expanded = quote! {
         impl IntoResponse for #name {
             fn into_response(self) -> Response {
-                BaseResponse::create(self)
+                let version = env!("CARGO_PKG_VERSION");
+                lib::serde::response::BaseResponse::new(version, self)
+                    .into_response()
             }
         }
     };
