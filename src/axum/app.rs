@@ -42,8 +42,8 @@ impl AppBuilder {
         Self::default()
     }
 
-    pub fn routes(mut self, routes: &[Router]) -> Self {
-        self.router = routes.iter().cloned().fold(self.router, Router::merge);
+    pub fn routes(mut self, routes: impl IntoIterator<Item = Router>) -> Self {
+        self.router = routes.into_iter().fold(self.router, Router::merge);
         self
     }
 
@@ -147,7 +147,7 @@ mod tests {
             let handler = tokio::spawn(async {
                 AppBuilder::new()
                     .socket((Ipv4Addr::LOCALHOST, 8080))
-                    .routes(&[Router::new()])
+                    .routes([Router::new()])
                     .fallback(|| async { "Fallback" })
                     .cors(CorsLayer::new())
                     .normalize_path(true)
