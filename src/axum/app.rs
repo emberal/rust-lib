@@ -77,8 +77,8 @@ impl AppBuilder {
     }
 
     pub async fn serve(self) -> io::Result<()> {
-        let listener = self.listener().await?;
         let _ = fmt_trace();
+        let listener = self.listener().await?;
 
         if self.normalize_path.unwrap_or(true) {
             let app = NormalizePathLayer::trim_trailing_slash().layer(self.create_app());
