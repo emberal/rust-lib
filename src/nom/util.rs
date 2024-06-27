@@ -1,11 +1,8 @@
 #[cfg(feature = "nom")]
-use nom::{error::Error, IResult};
-
-#[cfg(feature = "nom")]
-pub trait IntoResult<T> {
-    type Error;
-    fn into_result(self) -> Result<T, Self::Error>;
-}
+use {
+    crate::traits::IntoResult,
+    nom::{error::Error, IResult},
+};
 
 #[cfg(feature = "nom")]
 impl<T, R> IntoResult<T> for IResult<R, T> {
@@ -17,8 +14,9 @@ impl<T, R> IntoResult<T> for IResult<R, T> {
 
 #[cfg(all(test, feature = "nom"))]
 mod tests {
-    use super::*;
     use nom::character::complete::char as c;
+
+    use super::*;
 
     fn parse_char(input: &str) -> IResult<&str, char> {
         c('A')(input)
