@@ -21,7 +21,7 @@
 #[cfg(feature = "axum")]
 macro_rules! router {
     ($body:expr) => {
-        pub(crate) fn router() -> axum::Router<()> {
+        pub(crate) fn router() -> axum::Router {
             $body
         }
     };
@@ -104,6 +104,6 @@ mod tests {
 
     #[test]
     fn test_join_routes() {
-        let _router: Router<()> = join_routes![Router::new(), Router::new()];
+        let _router: Router = join_routes![Router::new(), Router::new()];
     }
 }

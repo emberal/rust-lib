@@ -42,6 +42,11 @@ impl AppBuilder {
         Self::default()
     }
 
+    pub fn route(mut self, route: Router) -> Self {
+        self.router = self.router.merge(route);
+        self
+    }
+
     pub fn routes(mut self, routes: impl IntoIterator<Item = Router>) -> Self {
         self.router = routes.into_iter().fold(self.router, Router::merge);
         self
