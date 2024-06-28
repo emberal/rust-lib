@@ -25,8 +25,16 @@ macro_rules! router {
             $body
         }
     };
+    ($body:expr; $state:ty) => {
+        pub(crate) fn router() -> axum::Router<$state> {
+            $body
+        }
+    };
     ($route:expr, $router:expr) => {
         router!(axum::Router::new().nest($route, $router));
+    };
+    ($route:expr, $router:expr, $state:ty) => {
+        router!(axum::Router::new().nest($route, $router); $state);
     };
     ($($method:ident $route:expr => $func:expr),* $(,)?) => {
         router!($crate::routes!($($method $route => $func),*));
@@ -66,6 +74,7 @@ macro_rules! join_routes {
 
 #[cfg(all(test, feature = "axum"))]
 mod tests {
+    use axum::extract::State;
     use axum::Router;
 
     async fn index() {}
@@ -91,6 +100,18 @@ mod tests {
                 get "/:exp" => || async {},
                 get "/table/:exp" => || async {}
             )
+        );
+    }
+
+    #[test]
+    fn test_nested_router_with_state() {
+        router!(
+            "/simplify",
+            routes!(
+                get "/:exp" => || async {},
+                get "/table/:exp" => |_state: State<String>| async {}
+            ),
+            String
         );
     }
 
