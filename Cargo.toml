@@ -1,6 +1,6 @@
 [package]
 name = "lib"
-version = "1.3.0"
+version = "1.3.1"
 edition = "2021"
 authors = ["Martin Berg Alstad"]
 
@@ -27,8 +27,7 @@ serde = { version = "1.0.203", optional = true, features = ["derive"] }
 derive = { path = "derive", optional = true }
 
 [features]
-axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber"]
-tokio = ["dep:tokio"]
+axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber", "dep:tokio"]
 io = ["dep:tokio", "dep:tokio-util"]
 iter = []
 nom = ["dep:nom"]

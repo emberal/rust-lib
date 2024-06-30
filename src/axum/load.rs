@@ -1,4 +1,4 @@
-#[cfg(feature = "tokio")]
+#[cfg(feature = "io")]
 use {crate::io::file, axum::body::Body, axum::response::Html, std::io};
 
 /// Load an HTML file from the given file path, relative to the current directory.
@@ -10,7 +10,7 @@ use {crate::io::file, axum::body::Body, axum::response::Html, std::io};
 /// ```
 /// let html = async { lib::axum::load::load_html("openapi.html").await.unwrap() };
 /// ```
-#[cfg(feature = "tokio")]
+#[cfg(feature = "io")]
 pub async fn load_html<Path>(file_path: Path) -> Result<Html<Body>, io::Error>
 where
     Path: AsRef<std::path::Path>,
@@ -18,7 +18,7 @@ where
     load_file(file_path).await.map(Html)
 }
 
-#[cfg(feature = "tokio")]
+#[cfg(feature = "io")]
 pub async fn load_file<Path>(file_path: Path) -> Result<Body, io::Error>
 where
     Path: AsRef<std::path::Path>,
@@ -70,7 +70,7 @@ mod tests {
             load_html!("load.rs", "{{replace_me}}" => "hello", "{{replace_me_too}}" => "world");
     }
 
-    #[cfg(feature = "tokio")]
+    #[cfg(feature = "io")]
     mod tokio {
         use super::super::*;
 

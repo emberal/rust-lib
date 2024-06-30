@@ -1,6 +1,7 @@
 use {
     axum::{extract::Request, handler::Handler, Router, ServiceExt},
-    std::net::Ipv4Addr,
+    std::{io, net::Ipv4Addr, net::SocketAddr},
+    tokio::net::TcpListener,
     tower::layer::Layer,
     tower_http::{
         cors::CorsLayer,
@@ -10,8 +11,6 @@ use {
     },
     tracing::{info, Level},
 };
-#[cfg(feature = "tokio")]
-use {std::io, std::net::SocketAddr, tokio::net::TcpListener};
 
 // TODO trim trailing slash into macro > let _app = NormalizePathLayer::trim_trailing_slash().layer(create_app!(routes));
 #[macro_export]
@@ -77,7 +76,6 @@ impl AppBuilder {
         self
     }
 
-    #[cfg(feature = "tokio")]
     pub async fn serve(self) -> io::Result<()> {
         let _ = fmt_trace(); // Allowed to fail
         let listener = self.listener().await?;
@@ -92,7 +90,6 @@ impl AppBuilder {
         Ok(())
     }
 
-    #[cfg(feature = "tokio")]
     async fn listener(&self) -> io::Result<TcpListener> {
         let addr = SocketAddr::from(self.socket.unwrap_or((Ipv4Addr::UNSPECIFIED, 8000)));
         info!("Initializing server on: {addr}");
@@ -128,7 +125,6 @@ mod tests {
 
     use super::*;
 
-    #[cfg(feature = "tokio")]
     mod tokio_tests {
         use std::time::Duration;
 
