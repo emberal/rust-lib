@@ -1,5 +1,4 @@
 #[macro_export]
-#[cfg(feature = "vec")]
 macro_rules! matrix {
     ($x:expr; $m:expr, $n:expr) => {
         vec![vec![$x; $n]; $m]
@@ -16,7 +15,7 @@ macro_rules! matrix {
     };
 }
 
-#[cfg(all(test, feature = "vec"))]
+#[cfg(test)]
 mod tests {
 
     #[test]

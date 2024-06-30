@@ -1,9 +1,7 @@
-#[cfg(feature = "vec")]
 pub trait Distinct {
     fn distinct(&mut self);
 }
 
-#[cfg(feature = "vec")]
 impl<T: PartialEq + Clone> Distinct for Vec<T> {
     fn distinct(&mut self) {
         *self = self.iter().fold(vec![], |mut acc, x| {
@@ -15,7 +13,7 @@ impl<T: PartialEq + Clone> Distinct for Vec<T> {
     }
 }
 
-#[cfg(all(test, feature = "vec"))]
+#[cfg(test)]
 mod tests {
     use super::*;
 

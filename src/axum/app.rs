@@ -1,4 +1,3 @@
-#[cfg(feature = "axum")]
 use {
     axum::{extract::Request, handler::Handler, Router, ServiceExt},
     std::net::Ipv4Addr,
@@ -11,12 +10,11 @@ use {
     },
     tracing::{info, Level},
 };
-#[cfg(all(feature = "axum", feature = "tokio"))]
+#[cfg(feature = "tokio")]
 use {std::io, std::net::SocketAddr, tokio::net::TcpListener};
 
 // TODO trim trailing slash into macro > let _app = NormalizePathLayer::trim_trailing_slash().layer(create_app!(routes));
 #[macro_export]
-#[cfg(feature = "axum")]
 macro_rules! create_app {
     ($router:expr) => {
         $router
@@ -27,7 +25,6 @@ macro_rules! create_app {
 }
 
 #[derive(Default)]
-#[cfg(feature = "axum")]
 pub struct AppBuilder {
     router: Router,
     socket: Option<(Ipv4Addr, u16)>,
@@ -36,7 +33,6 @@ pub struct AppBuilder {
     tracing: Option<TraceLayer<HttpMakeClassifier>>,
 }
 
-#[cfg(all(feature = "axum", feature = "tokio"))]
 impl AppBuilder {
     pub fn new() -> Self {
         Self::default()
@@ -81,8 +77,9 @@ impl AppBuilder {
         self
     }
 
+    #[cfg(feature = "tokio")]
     pub async fn serve(self) -> io::Result<()> {
-        let _ = fmt_trace();
+        let _ = fmt_trace(); // Allowed to fail
         let listener = self.listener().await?;
 
         if self.normalize_path.unwrap_or(true) {
@@ -95,6 +92,7 @@ impl AppBuilder {
         Ok(())
     }
 
+    #[cfg(feature = "tokio")]
     async fn listener(&self) -> io::Result<TcpListener> {
         let addr = SocketAddr::from(self.socket.unwrap_or((Ipv4Addr::UNSPECIFIED, 8000)));
         info!("Initializing server on: {addr}");
@@ -124,7 +122,7 @@ fn fmt_trace() -> Result<(), String> {
         .map_err(|error| error.to_string())
 }
 
-#[cfg(all(test, feature = "axum"))]
+#[cfg(test)]
 mod tests {
     use axum::Router;
 

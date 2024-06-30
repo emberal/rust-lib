@@ -1,10 +1,8 @@
-#[cfg(feature = "nom")]
 use {
     crate::traits::IntoResult,
     nom::{error::Error, IResult},
 };
 
-#[cfg(feature = "nom")]
 impl<T, R> IntoResult<T> for IResult<R, T> {
     type Error = nom::Err<Error<R>>;
     fn into_result(self) -> Result<T, Self::Error> {
@@ -12,7 +10,7 @@ impl<T, R> IntoResult<T> for IResult<R, T> {
     }
 }
 
-#[cfg(all(test, feature = "nom"))]
+#[cfg(test)]
 mod tests {
     use nom::character::complete::char as c;
 

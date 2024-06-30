@@ -1,4 +1,4 @@
-#[cfg(all(feature = "tokio", feature = "axum"))]
+#[cfg(feature = "tokio")]
 use {crate::io::file, axum::body::Body, axum::response::Html, std::io};
 
 /// Load an HTML file from the given file path, relative to the current directory.
@@ -10,7 +10,7 @@ use {crate::io::file, axum::body::Body, axum::response::Html, std::io};
 /// ```
 /// let html = async { lib::axum::load::load_html("openapi.html").await.unwrap() };
 /// ```
-#[cfg(all(feature = "tokio", feature = "axum"))]
+#[cfg(feature = "tokio")]
 pub async fn load_html<Path>(file_path: Path) -> Result<Html<Body>, io::Error>
 where
     Path: AsRef<std::path::Path>,
@@ -18,7 +18,7 @@ where
     load_file(file_path).await.map(Html)
 }
 
-#[cfg(all(feature = "tokio", feature = "axum"))]
+#[cfg(feature = "tokio")]
 pub async fn load_file<Path>(file_path: Path) -> Result<Body, io::Error>
 where
     Path: AsRef<std::path::Path>,
@@ -38,7 +38,6 @@ where
 /// ```
 // TODO check platform and use correct path separator
 #[macro_export]
-#[cfg(feature = "axum")]
 macro_rules! load_html {
     ($filepath:expr) => {
         axum::response::Html(
@@ -58,7 +57,7 @@ macro_rules! load_html {
     };
 }
 
-#[cfg(all(test, feature = "axum"))]
+#[cfg(test)]
 mod tests {
     #[test]
     fn test_load_html() {

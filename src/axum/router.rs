@@ -18,7 +18,6 @@
 /// ));
 /// ```
 #[macro_export]
-#[cfg(feature = "axum")]
 macro_rules! router {
     ($body:expr) => {
         pub(crate) fn router() -> axum::Router {
@@ -52,7 +51,6 @@ macro_rules! router {
 /// );
 /// ```
 #[macro_export]
-#[cfg(feature = "axum")]
 macro_rules! routes {
     ($($method:ident $route:expr => $func:expr),* $(,)?) => {
         axum::Router::new()
@@ -63,7 +61,6 @@ macro_rules! routes {
 }
 
 #[macro_export]
-#[cfg(feature = "axum")]
 macro_rules! join_routes {
     ($($route:expr),* $(,)?) => {
         axum::Router::new()$(
@@ -72,7 +69,7 @@ macro_rules! join_routes {
     };
 }
 
-#[cfg(all(test, feature = "axum"))]
+#[cfg(test)]
 mod tests {
     use axum::extract::State;
     use axum::Router;
@@ -117,7 +114,7 @@ mod tests {
 
     #[test]
     fn test_routes() {
-        let _router: Router<()> = routes!(
+        let _router: Router = routes!(
             get "/" => index,
             post "/" => || async {}
         );

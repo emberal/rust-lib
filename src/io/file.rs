@@ -1,7 +1,5 @@
-#[cfg(feature = "tokio")]
 use {std::io::Error, tokio::fs::File, tokio_util::io::ReaderStream};
 
-#[cfg(feature = "tokio")]
 pub async fn load_file<Path>(file_path: Path) -> Result<ReaderStream<File>, Error>
 where
     Path: AsRef<std::path::Path>,
@@ -9,7 +7,7 @@ where
     File::open(file_path).await.map(ReaderStream::new)
 }
 
-#[cfg(all(test, feature = "tokio"))]
+#[cfg(test)]
 mod tests {
     use super::*;
 

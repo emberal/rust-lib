@@ -1,5 +1,4 @@
 #[macro_export]
-#[cfg(feature = "vec")]
 macro_rules! map {
     () => { std::collections::HashMap::new() };
     ($($k:expr => $v:expr),* $(,)?) => {
@@ -13,7 +12,7 @@ macro_rules! map {
     };
 }
 
-#[cfg(all(test, feature = "vec"))]
+#[cfg(test)]
 mod tests {
     use std::collections::HashMap;
 

@@ -1,5 +1,4 @@
 #[macro_export]
-#[cfg(feature = "vec")]
 macro_rules! set {
     () => { std::collections::HashSet::new() };
     ($($x:expr),* $(,)?) => {
@@ -13,7 +12,7 @@ macro_rules! set {
     };
 }
 
-#[cfg(all(test, feature = "vec"))]
+#[cfg(test)]
 mod tests {
     use std::collections::HashSet;
 

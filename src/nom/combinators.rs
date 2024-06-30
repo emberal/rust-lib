@@ -1,4 +1,3 @@
-#[cfg(feature = "nom")]
 use {
     nom::{
         bytes::complete::take_while_m_n,
@@ -16,7 +15,6 @@ use {
 /// - Parameters
 ///    - `inner`: The parser to trim
 /// - Returns: A parser that trims leading and trailing whitespace from the input and then runs the value from the inner parser
-#[cfg(feature = "nom")]
 pub fn trim<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
     Parser: Fn(&'a str) -> IResult<&'a str, R>,
@@ -29,7 +27,6 @@ where
 /// - Parameters
 ///     - `inner`: The parser to run inside the parentheses
 /// - Returns: A parser that parses a parenthesized expression
-#[cfg(feature = "nom")]
 pub fn parenthesized<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
     Parser: Fn(&'a str) -> IResult<&'a str, R>,
@@ -42,7 +39,6 @@ where
 ///   - `n`: The length of the string to take
 ///   - `predicate`: The predicate to call to validate the input
 /// - Returns: A parser that takes `n` characters from the input
-#[cfg(feature = "nom")]
 pub fn take_where<F, Input>(n: usize, predicate: F) -> impl Fn(Input) -> IResult<Input, Input>
 where
     Input: InputTake + InputIter + InputLength + Slice<RangeFrom<usize>>,
@@ -51,7 +47,6 @@ where
     take_while_m_n(n, n, predicate)
 }
 
-#[cfg(feature = "nom")]
 pub fn exhausted<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
     Parser: Fn(&'a str) -> IResult<&'a str, R>,
@@ -59,7 +54,7 @@ where
     terminated(inner, eof)
 }
 
-#[cfg(all(test, feature = "nom"))]
+#[cfg(test)]
 mod tests {
     use nom::bytes::streaming::take_while;
 

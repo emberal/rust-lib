@@ -1,4 +1,3 @@
-#[cfg(all(feature = "axum", feature = "serde"))]
 use {
     crate::serde::response::BaseResponse,
     axum::{
@@ -8,14 +7,13 @@ use {
     serde::Serialize,
 };
 
-#[cfg(all(feature = "axum", feature = "serde"))]
 impl<T: Serialize> IntoResponse for BaseResponse<T> {
     fn into_response(self) -> Response {
         Json(self).into_response()
     }
 }
 
-#[cfg(all(test, feature = "axum", feature = "serde"))]
+#[cfg(test)]
 mod tests {
     use axum::http::header::CONTENT_TYPE;
     use axum::http::{HeaderValue, StatusCode};
