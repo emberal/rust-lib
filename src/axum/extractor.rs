@@ -45,6 +45,7 @@ impl From<Option<&str>> for ContentType {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct File {
     pub filename: String,
     pub bytes: Vec<u8>,
@@ -78,10 +79,12 @@ impl File {
 /// Extractor for a single file from a multipart request.
 /// Expects exactly one file. A file must have a name, bytes and optionally a content type.
 /// This extractor consumes the request and must ble placed last in the handler.
+#[derive(Debug, Clone, PartialEq)]
 pub struct MultipartFile(pub File);
 /// Extractor for multiple files from a multipart request.
 /// Expects at least one file. A file must have a name, bytes and optionally a content type.
 /// This extractor consumes the request and must ble placed last in the handler.
+#[derive(Debug, Clone, PartialEq)]
 pub struct MultipartFiles(pub Vec<File>);
 
 #[derive(Debug, Error)]
@@ -139,16 +142,13 @@ where
     type Rejection = MultipartFileRejection;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        let mut multipart = Multipart::from_request(req, state).await?;
-        let fields = get_fields(&mut multipart).await?;
-        if fields.len() > 1 {
+        let multipart = Multipart::from_request(req, state).await?;
+        let files = get_files(multipart).await?;
+        if files.len() > 1 {
             Err(MultipartFileRejection::SeveralFiles)
         } else {
-            let field = fields
-                .into_iter()
-                .next()
-                .ok_or(MultipartFileRejection::NoFiles)?;
-            Ok(MultipartFile(File::from_field(field).await?))
+            let field = files.first().ok_or(MultipartFileRejection::NoFiles)?;
+            Ok(MultipartFile(field.clone()))
         }
     }
 }
@@ -161,27 +161,24 @@ where
     type Rejection = MultipartFileRejection;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        let mut multipart = Multipart::from_request(req, state).await?;
-        let fields = get_fields(&mut multipart).await?;
-        if fields.is_empty() {
+        let multipart = Multipart::from_request(req, state).await?;
+        let files = get_files(multipart).await?;
+        if files.is_empty() {
             Err(MultipartFileRejection::NoFiles)
         } else {
-            let mut files = vec![];
-            for field in fields.into_iter() {
-                files.push(File::from_field(field).await?);
-            }
             Ok(MultipartFiles(files))
         }
     }
 }
 
-async fn get_fields<'a>(
-    multipart: &'a mut Multipart,
-) -> Result<Vec<Field<'a>>, MultipartFileRejection> {
-    let fields: Vec<Field> = multipart.next_field().await?.into_iter().collect();
-    if fields.is_empty() {
+async fn get_files<'a>(mut multipart: Multipart) -> Result<Vec<File>, MultipartFileRejection> {
+    let mut files = vec![];
+    while let Some(field) = multipart.next_field().await? {
+        files.push(File::from_field(field).await?);
+    }
+    if files.is_empty() {
         Err(MultipartFileRejection::NoFiles)
     } else {
-        Ok(fields)
+        Ok(files)
     }
 }
