@@ -17,7 +17,7 @@ use {
 /// - Returns: A parser that trims leading and trailing whitespace from the input and then runs the value from the inner parser
 pub fn trim<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
-    Parser: Fn(&'a str) -> IResult<&'a str, R>,
+    Parser: FnMut(&'a str) -> IResult<&'a str, R>,
 {
     delimited(multispace0, inner, multispace0)
 }
@@ -29,7 +29,7 @@ where
 /// - Returns: A parser that parses a parenthesized expression
 pub fn parenthesized<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
-    Parser: Fn(&'a str) -> IResult<&'a str, R>,
+    Parser: FnMut(&'a str) -> IResult<&'a str, R>,
 {
     delimited(char('('), trim(inner), char(')'))
 }
@@ -49,16 +49,15 @@ where
 
 pub fn exhausted<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
-    Parser: Fn(&'a str) -> IResult<&'a str, R>,
+    Parser: FnMut(&'a str) -> IResult<&'a str, R>,
 {
     terminated(inner, eof)
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::bytes::streaming::take_while;
-
     use super::*;
+    use nom::{bytes::complete::take_while, sequence::tuple};
 
     #[test]
     fn test_trim_both_sides() {
@@ -153,5 +152,17 @@ mod tests {
     fn test_exhausted_not_exhausted() {
         let input = "test ";
         assert!(exhausted(take_where(4, |c: char| c.is_ascii_alphabetic()))(input).is_err());
+    }
+
+    #[test]
+    fn test_exhausted_tuple() {
+        let input = "test";
+        let (remaining, result) = exhausted(tuple((
+            take_where(3, |c: char| c.is_ascii_alphabetic()),
+            take_while(|c: char| c.is_ascii_alphabetic()),
+        )))(input)
+        .unwrap();
+        assert_eq!(remaining, "");
+        assert_eq!(result, ("tes", "t"));
     }
 }
