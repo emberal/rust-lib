@@ -31,6 +31,7 @@ pub fn parenthesized<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IRe
 where
     Parser: FnMut(&'a str) -> IResult<&'a str, R>,
 {
+    // TODO move trim out of here
     delimited(char('('), trim(inner), char(')'))
 }
 
