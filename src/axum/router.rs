@@ -20,12 +20,12 @@
 #[macro_export]
 macro_rules! router {
     ($body:expr) => {
-        pub(crate) fn router() -> axum::Router {
+        pub fn router() -> axum::Router {
             $body
         }
     };
     ($body:expr; $state:ty) => {
-        pub(crate) fn router() -> axum::Router<$state> {
+        pub fn router() -> axum::Router<$state> {
             $body
         }
     };
