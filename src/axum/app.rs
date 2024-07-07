@@ -1,3 +1,4 @@
+use std::net::IpAddr;
 use {
     axum::{extract::Request, handler::Handler, Router, ServiceExt},
     std::{io, net::Ipv4Addr, net::SocketAddr},
@@ -26,7 +27,7 @@ macro_rules! create_app {
 #[derive(Default)]
 pub struct AppBuilder {
     router: Router,
-    socket: Option<(Ipv4Addr, u16)>,
+    socket: Option<(IpAddr, u16)>,
     cors: Option<CorsLayer>,
     normalize_path: Option<bool>,
     tracing: Option<TraceLayer<HttpMakeClassifier>>,
@@ -47,8 +48,18 @@ impl AppBuilder {
         self
     }
 
-    pub fn socket(mut self, socket: impl Into<(Ipv4Addr, u16)>) -> Self {
-        self.socket = Some(socket.into());
+    pub fn socket<IP: Into<IpAddr>>(mut self, socket: impl Into<(IP, u16)>) -> Self {
+        let (ip, port) = socket.into();
+        self.socket = Some((ip.into(), port));
+        self
+    }
+
+    pub fn port(mut self, port: u16) -> Self {
+        self.socket = if let Some((ip, _)) = self.socket {
+            Some((ip, port))
+        } else {
+            Some((Ipv4Addr::UNSPECIFIED.into(), port))
+        };
         self
     }
 
@@ -91,7 +102,7 @@ impl AppBuilder {
     }
 
     async fn listener(&self) -> io::Result<TcpListener> {
-        let addr = SocketAddr::from(self.socket.unwrap_or((Ipv4Addr::UNSPECIFIED, 8000)));
+        let addr = SocketAddr::from(self.socket.unwrap_or((Ipv4Addr::UNSPECIFIED.into(), 8000)));
         info!("Initializing server on: {addr}");
         TcpListener::bind(&addr).await
     }
