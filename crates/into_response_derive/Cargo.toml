@@ -1,0 +1,12 @@
+[package]
+name = "into-response-derive"
+version = "1.1.0"
+edition = { workspace = true }
+rust-version = { workspace = true }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { workspace = true }
+quote = { workspace = true }
