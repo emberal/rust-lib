@@ -31,8 +31,7 @@ pub fn parenthesized<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IRe
 where
     Parser: FnMut(&'a str) -> IResult<&'a str, R>,
 {
-    // TODO move trim out of here
-    delimited(char('('), trim(inner), char(')'))
+    delimited(char('('), inner, char(')'))
 }
 
 /// Take where the predicate is true and the length is exactly `n`
@@ -57,8 +56,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use nom::{bytes::complete::take_while, sequence::tuple};
+
+    use super::*;
 
     #[test]
     fn test_trim_both_sides() {

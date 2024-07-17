@@ -9,7 +9,7 @@ homepage = "emberal.github.io"
 
 [package]
 name = "lib"
-version = "1.4.0"
+version = "1.4.1"
 description = "A library with utilities and helper fuctions."
 edition = { workspace = true }
 rust-version = { workspace = true }
