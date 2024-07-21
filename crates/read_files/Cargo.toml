@@ -10,4 +10,4 @@ proc-macro = true
 [dependencies]
 syn = { workspace = true }
 quote = { workspace = true }
-regex = "1.10.5"
+regex = "1.10"
