@@ -2,8 +2,8 @@
 
 #[cfg(all(feature = "derive", feature = "serde"))]
 pub extern crate into_response_derive;
-#[cfg(feature = "load-files")]
-pub extern crate load_files;
+#[cfg(feature = "read-files")]
+pub extern crate read_files;
 
 #[cfg(feature = "axum")]
 pub mod axum;
