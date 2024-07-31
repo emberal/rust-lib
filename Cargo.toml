@@ -1,9 +1,10 @@
 [workspace]
 members = ["crates/*"]
+exclude = ["examples"]
 
 [workspace.package]
 edition = "2021"
-rust-version = "1.79.0"
+rust-version = "1.80.0"
 authors = ["Martin Berg Alstad"]
 homepage = "emberal.github.io"
 
@@ -26,8 +27,12 @@ tower-http = { version = "0.5", optional = true, features = ["trace", "cors", "n
 # Async
 tokio = { version = "1.38", optional = true, features = ["fs"] }
 tokio-util = { version = "0.7", optional = true, features = ["io"] }
+async-stream = { version = "0.3", optional = true }
+futures = { version = "0.3", optional = true }
 # Error handling
 thiserror = { version = "1.0", optional = true }
+# LLM
+async-openai = { version = "0.23", optional = true }
 # Logging
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
@@ -38,6 +43,8 @@ into-response-derive = { path = "crates/into_response_derive", optional = true }
 read-files = { path = "crates/read_files", optional = true }
 # Serialization / Deserialization
 serde = { version = "1.0", optional = true, features = ["derive"] }
+# Utils
+cfg-if = "1.0.0"
 
 [workspace.dependencies]
 syn = "2.0"
@@ -51,3 +58,4 @@ nom = ["dep:nom"]
 serde = ["dep:serde"]
 derive = ["dep:into-response-derive", "axum", "serde"]
 read-files = ["dep:read-files"]
+openai = ["dep:async-openai", "dep:async-stream", "dep:futures"]

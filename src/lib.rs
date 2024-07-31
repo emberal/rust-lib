@@ -11,6 +11,8 @@ pub mod axum;
 pub mod io;
 #[cfg(feature = "nom")]
 pub mod nom;
+#[cfg(feature = "openai")]
+pub mod openai;
 #[cfg(feature = "serde")]
 pub mod serde;
 pub mod traits;

@@ -9,11 +9,13 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/read_files/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/read_files/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/read_files/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/openai-assistant/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/examples/multipart_file/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/into_response_derive/target" />
       <excludeFolder url="file://$MODULE_DIR$/crates/read_files/target" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/openai-assistant/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
