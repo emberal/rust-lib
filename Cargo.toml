@@ -1,15 +1,16 @@
 [workspace]
 members = ["crates/*"]
+exclude = ["examples"]
 
 [workspace.package]
 edition = "2021"
-rust-version = "1.79.0"
+rust-version = "1.80.0"
 authors = ["Martin Berg Alstad"]
 homepage = "emberal.github.io"
 
 [package]
 name = "lib"
-version = "1.4.1-hotfix-hotfix-2"
+version = "1.4.2"
 description = "A library with utilities and helper fuctions."
 edition = { workspace = true }
 rust-version = { workspace = true }
