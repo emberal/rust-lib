@@ -16,6 +16,12 @@ impl<T: Serialize> BaseResponse<T> {
     }
 }
 
+impl<T: Serialize> From<T> for BaseResponse<T> {
+    fn from(body: T) -> Self {
+        Self::new(env!("CARGO_PKG_VERSION"), body)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
