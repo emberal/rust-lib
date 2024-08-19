@@ -1,0 +1,12 @@
+[package]
+name = "diesel-crud-trait"
+version = "0.1.0"
+edition = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+diesel = { workspace = true, features = ["postgres"] }
+diesel-async = { workspace = true, features = ["postgres", "deadpool"] }
+async-trait = "0.1"
+deadpool-diesel = { version = "0.6", features = ["postgres"] }
+thiserror = "1.0"

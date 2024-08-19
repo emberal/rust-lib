@@ -4,7 +4,7 @@ exclude = ["examples"]
 
 [workspace.package]
 edition = "2021"
-rust-version = "1.80.0"
+rust-version = "1.80.1"
 authors = ["Martin Berg Alstad"]
 homepage = "emberal.github.io"
 
@@ -25,8 +25,11 @@ axum = { version = "0.7", optional = true, features = ["multipart"] }
 tower = { version = "0.5", optional = true }
 tower-http = { version = "0.5", optional = true, features = ["trace", "cors", "normalize-path"] }
 # Async
-tokio = { version = "1.38", optional = true, features = ["fs"] }
+tokio = { version = "1.39", optional = true, features = ["fs"] }
 tokio-util = { version = "0.7", optional = true, features = ["io"] }
+# Database
+diesel-crud-derive = { path = "crates/diesel_crud_derive", optional = true }
+diesel-crud-trait = { path = "crates/diesel_crud_trait", optional = true }
 # Error handling
 thiserror = { version = "1.0", optional = true }
 # Logging
@@ -43,12 +46,17 @@ serde = { version = "1.0", optional = true, features = ["derive"] }
 [workspace.dependencies]
 syn = "2.0"
 quote = "1.0"
+deluxe = "0.5"
+proc-macro2 = "1.0"
+diesel = "2.2"
+diesel-async = "0.5"
 
 [features]
 axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber", "dep:tokio"]
+diesel = ["dep:diesel-crud-trait"]
 io = ["dep:tokio", "dep:tokio-util"]
 iter = []
 nom = ["dep:nom"]
 serde = ["dep:serde"]
-derive = ["dep:into-response-derive", "axum", "serde"]
+derive = ["dep:into-response-derive", "dep:diesel-crud-derive"]
 read-files = ["dep:read-files"]
