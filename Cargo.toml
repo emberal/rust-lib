@@ -22,7 +22,7 @@ homepage = { workspace = true }
 [dependencies]
 # Api
 axum = { version = "0.7", optional = true, features = ["multipart"] }
-tower = { version = "0.4", optional = true }
+tower = { version = "0.5", optional = true }
 tower-http = { version = "0.5", optional = true, features = ["trace", "cors", "normalize-path"] }
 # Async
 tokio = { version = "1.38", optional = true, features = ["fs"] }
