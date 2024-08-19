@@ -4,7 +4,7 @@ use serde::Serialize;
 pub struct BaseResponse<T: Serialize> {
     pub version: String,
     #[serde(flatten)]
-    pub body: T, // T must be a struct (or enum?)
+    pub body: T, // T must be a struct (or enum?) TODO from! macro that validates T on compile time
 }
 
 impl<T: Serialize> BaseResponse<T> {
@@ -16,10 +16,11 @@ impl<T: Serialize> BaseResponse<T> {
     }
 }
 
-impl<T: Serialize> From<T> for BaseResponse<T> {
-    fn from(body: T) -> Self {
-        Self::new(env!("CARGO_PKG_VERSION"), body)
-    }
+#[macro_export]
+macro_rules! from {
+    ($body:expr) => {
+        BaseResponse::new(env!("CARGO_PKG_VERSION"), $body)
+    };
 }
 
 #[cfg(test)]
@@ -39,6 +40,16 @@ mod tests {
                 message: "Hi".to_string(),
             },
         );
+        assert_eq!(response.body.message, "Hi".to_string());
+    }
+
+    #[test]
+    fn test_from_macro() {
+        let response = from!(Response {
+            message: "Hi".to_string(),
+        });
+        from!(1); // Should not be allowed
+        assert_eq!(response.version, env!("CARGO_PKG_VERSION"));
         assert_eq!(response.body.message, "Hi".to_string());
     }
 }
