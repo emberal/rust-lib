@@ -1,9 +1,15 @@
-use std::net::IpAddr;
 use {
-    axum::{extract::Request, handler::Handler, Router, ServiceExt},
-    std::{io, net::Ipv4Addr, net::SocketAddr},
+    axum::{
+        extract::Request, handler::Handler, response::IntoResponse, routing::Route, Router,
+        ServiceExt,
+    },
+    std::{
+        convert::Infallible,
+        io,
+        net::{IpAddr, Ipv4Addr, SocketAddr},
+    },
     tokio::net::TcpListener,
-    tower::layer::Layer,
+    tower::{layer::Layer, Service},
     tower_http::{
         cors::CorsLayer,
         normalize_path::NormalizePathLayer,
@@ -48,6 +54,19 @@ impl AppBuilder {
         self
     }
 
+    /// Adds a layer to the previously added routes
+    pub fn layer<L>(mut self, layer: L) -> Self
+    where
+        L: Layer<Route> + Clone + Send + 'static,
+        L::Service: Service<Request> + Clone + Send + 'static,
+        <L::Service as Service<Request>>::Response: IntoResponse + 'static,
+        <L::Service as Service<Request>>::Error: Into<Infallible> + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+    {
+        self.router = self.router.layer(layer);
+        self
+    }
+
     pub fn socket<IP: Into<IpAddr>>(mut self, socket: impl Into<(IP, u16)>) -> Self {
         let (ip, port) = socket.into();
         self.socket = Some((ip.into(), port));
@@ -87,6 +106,13 @@ impl AppBuilder {
         self
     }
 
+    /// Build the app and start the server
+    /// # Default Options
+    /// - IP == 0.0.0.0
+    /// - Port == 8000
+    /// - Cors == None
+    /// - Normalize Path == true
+    /// - Tracing == Default compact
     pub async fn serve(self) -> io::Result<()> {
         let _ = fmt_trace(); // Allowed to fail
         let listener = self.listener().await?;
@@ -148,7 +174,7 @@ mod tests {
             let handler = tokio::spawn(async {
                 AppBuilder::new().serve().await.unwrap();
             });
-            sleep(Duration::from_secs(1)).await;
+            sleep(Duration::from_millis(250)).await;
             handler.abort();
         }
 
@@ -162,11 +188,12 @@ mod tests {
                     .cors(CorsLayer::new())
                     .normalize_path(true)
                     .tracing(TraceLayer::new_for_http())
+                    .layer(TraceLayer::new_for_http())
                     .serve()
                     .await
                     .unwrap();
             });
-            sleep(Duration::from_secs(1)).await;
+            sleep(Duration::from_millis(250)).await;
             handler.abort();
         }
     }

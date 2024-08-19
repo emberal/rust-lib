@@ -1,5 +1,9 @@
 #[cfg(feature = "io")]
-use {crate::io::file, axum::body::Body, axum::response::Html, std::io};
+use {
+    crate::io::file,
+    axum::{body::Body, response::Html},
+    std::io,
+};
 
 /// Load an HTML file from the given file path, relative to the current directory.
 /// # Arguments
