@@ -4,3 +4,5 @@ pub mod load;
 #[cfg(feature = "serde")]
 pub mod response;
 pub mod router;
+#[cfg(feature = "serde")]
+pub mod wrappers;

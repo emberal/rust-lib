@@ -19,7 +19,7 @@ impl<T: Serialize> BaseResponse<T> {
 #[macro_export]
 macro_rules! from {
     ($body:expr) => {
-        BaseResponse::new(env!("CARGO_PKG_VERSION"), $body)
+        $crate::serde::response::BaseResponse::new(env!("CARGO_PKG_VERSION"), $body)
     };
 }
 

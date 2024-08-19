@@ -42,6 +42,10 @@ into-response-derive = { path = "crates/into_response_derive", optional = true }
 read-files = { path = "crates/read_files", optional = true }
 # Serialization / Deserialization
 serde = { version = "1.0", optional = true, features = ["derive"] }
+# Time
+chrono = { version = "0.4", optional = true, features = ["serde"] }
+# Utils
+derive_more = { version = "1.0", features = ["from", "constructor"] }
 
 [workspace.dependencies]
 syn = "2.0"
@@ -60,3 +64,4 @@ nom = ["dep:nom"]
 serde = ["dep:serde"]
 derive = ["dep:into-response-derive", "dep:diesel-crud-derive"]
 read-files = ["dep:read-files"]
+time = ["dep:chrono"]

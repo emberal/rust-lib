@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+extern crate self as lib;
 
 #[cfg(all(feature = "derive", feature = "diesel"))]
 pub extern crate diesel_crud_derive;
@@ -17,6 +18,8 @@ pub mod io;
 pub mod nom;
 #[cfg(feature = "serde")]
 pub mod serde;
+#[cfg(feature = "time")]
+pub mod time;
 pub mod traits;
 #[cfg(feature = "iter")]
 pub mod vector;

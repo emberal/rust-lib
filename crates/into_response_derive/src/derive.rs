@@ -3,6 +3,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
+// TODO derive generic types
 pub fn into_response_derive_impl(input: DeriveInput) -> TokenStream {
     let name = &input.ident;
 
