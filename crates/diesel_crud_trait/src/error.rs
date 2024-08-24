@@ -2,7 +2,7 @@ use diesel::result::Error;
 use thiserror::Error;
 
 /// Error type for CRUD operations
-#[derive(Debug, Error)]
+#[derive(Debug, PartialEq, Error)]
 pub enum CrudError {
     #[error("Resource not found")]
     NotFound,
