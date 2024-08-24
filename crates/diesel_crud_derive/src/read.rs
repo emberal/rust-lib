@@ -1,38 +1,40 @@
-use proc_macro2::Ident;
+use crate::common::PrimaryKey;
+use crate::{common, Attributes};
 use quote::quote;
-use syn::Expr;
-
-use crate::{common, StructAttributes};
 
 pub(crate) fn derive_diesel_crud_read_impl(
-    StructAttributes {
-        table, entity, pk, ..
-    }: &StructAttributes,
-    identifier: &Ident,
+    Attributes {
+        struct_ident,
+        table,
+        pk,
+        ..
+    }: &Attributes,
 ) -> proc_macro2::TokenStream {
-    let body = function_body(table);
-    let return_type = common::return_type(quote! { Self::Entity });
+    if pk.is_none() {
+        panic!("Please specify a primary key using #[diesel_crud(pk)]");
+    }
+    let PrimaryKey { ty: pk_type, .. } = pk.as_ref().unwrap();
+    let return_type = common::return_type(quote! { Self });
 
     quote! {
         #[automatically_derived]
-        impl lib::diesel_crud_trait::DieselCrudRead for #identifier {
-            type PK = #pk;
-            type Entity = #entity;
-            fn read<'a, 'b>(&'a self, pk: Self::PK) -> #return_type
+        impl lib::diesel_crud_trait::DieselCrudRead for #struct_ident {
+            type PK = #pk_type;
+            fn read<'a, 'b>(pk: Self::PK, conn: &'a mut diesel_async::AsyncPgConnection) -> #return_type
                 where
-                    Self: Sync + 'a,
+                    Self: Sized + Sync + 'a,
                     'a: 'b
             {
                 Box::pin(async move {
-                    #body
+                    use diesel::associations::HasTable;
+                    diesel_async::RunQueryDsl::get_result(
+                        diesel::QueryDsl::find(#table::table::table(), pk),
+                        conn
+                    )
+                        .await
+                        .map_err(Into::into)
                 })
             }
         }
     }
-}
-
-fn function_body(table: &Expr) -> proc_macro2::TokenStream {
-    common::function_body(quote! {
-        diesel_async::RunQueryDsl::get_result(diesel::QueryDsl::find(#table::table::table(), pk), &mut connection).await.map_err(Into::into)
-    })
 }

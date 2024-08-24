@@ -1,39 +1,35 @@
-use crate::{common, StructAttributes};
-use proc_macro2::Ident;
+use crate::{common, Attributes};
 use quote::quote;
-use syn::Expr;
 
 pub(crate) fn derive_diesel_crud_update_impl(
-    StructAttributes { table, update, .. }: &StructAttributes,
-    identifier: &Ident,
+    Attributes {
+        struct_ident,
+        table,
+        update,
+        ..
+    }: &Attributes,
 ) -> proc_macro2::TokenStream {
-    let body = function_body(table);
-    let return_type = common::return_type(quote! { usize });
+    let return_type = common::return_type(quote! { Self });
 
     quote! {
         #[automatically_derived]
-        impl lib::diesel_crud_trait::DieselCrudUpdate for #identifier {
+        impl lib::diesel_crud_trait::DieselCrudUpdate for #struct_ident {
             type Update = #update;
-            fn update<'a, 'b>(&'a self, update: Self::Update) -> #return_type
+            fn update<'a, 'b>(update: Self::Update, conn: &'a mut diesel_async::AsyncPgConnection) -> #return_type
                 where
-                    Self: Sync + 'a,
+                    Self: Sized + Sync + 'a,
                     'a: 'b,
             {
                 Box::pin(async move {
-                    #body
+                    use diesel::associations::HasTable;
+                    diesel_async::RunQueryDsl::get_result(
+                        diesel::dsl::update(#table::table::table()).set(update),
+                        conn,
+                    )
+                        .await
+                        .map_err(Into::into)
                 })
             }
         }
     }
-}
-
-fn function_body(table: &Expr) -> proc_macro2::TokenStream {
-    common::function_body(quote! {
-        diesel_async::RunQueryDsl::execute(
-            diesel::dsl::update(#table::table::table()).set(update),
-            &mut connection,
-        )
-            .await
-            .map_err(Into::into)
-    })
 }

@@ -1,18 +1,19 @@
 mod error;
 
-pub use error::CrudError;
-
 use async_trait::async_trait;
 use diesel::{AsChangeset, Insertable};
+use diesel_async::AsyncPgConnection;
+pub use error::CrudError;
 
-pub trait DieselCrud<'insertable, 'entity, Table>:
-    DieselCrudCreate<'insertable, 'entity, Table>
-    + DieselCrudRead
-    + DieselCrudUpdate
-    + DieselCrudDelete
-    + DieselCrudList
-where
-    'entity: 'insertable,
+/// Combines all CRUD operations into a single trait
+/// Includes:
+/// - Create
+/// - Read
+/// - Update
+/// - Delete
+/// - List
+pub trait DieselCrud<Table>:
+    DieselCrudCreate<Table> + DieselCrudRead + DieselCrudUpdate + DieselCrudDelete + DieselCrudList
 {
 }
 
@@ -21,20 +22,19 @@ where
 ///
 /// Implementing the trait requires the `async_trait` macro.
 /// # Associations
-/// - `Create` - The type to insert
-/// - `Entity` - The type that will be returned
+/// - `Insert` - The type to insert, must implement `Insertable<Table>`
 /// # Parameters
-/// - `create` - The entity to insert
+/// - `insert` - The entity to insert
+/// - `conn` - The database connection
 /// # Returns
 /// A result containing the inserted entity or a `CrudError`
 #[async_trait]
-pub trait DieselCrudCreate<'insertable, 'entity, Table>
+pub trait DieselCrudCreate<Table>
 where
-    'entity: 'insertable,
+    Self: Sized,
 {
-    type Create: Insertable<Table>;
-    type Entity: 'entity;
-    async fn create(&self, create: &'insertable Self::Create) -> Result<Self::Entity, CrudError>;
+    type Insert: Insertable<Table>;
+    async fn create(insert: Self::Insert, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
 }
 
 /// Gets an entity from the database
@@ -42,17 +42,19 @@ where
 /// Implementing the trait requires the `async_trait` macro.
 /// # Associations
 /// - `PK` - The primary key of the entity
-/// - `Entity` - The type that will be returned
 /// # Parameters
 /// - `pk` - The primary key of the entity
+/// - `conn` - The database connection
 /// # Returns
 /// A result containing the entity or a `CrudError`.
 /// If the entity is not found, the error should be `CrudError::NotFound`.
 #[async_trait]
-pub trait DieselCrudRead {
+pub trait DieselCrudRead
+where
+    Self: Sized,
+{
     type PK;
-    type Entity;
-    async fn read(&self, pk: Self::PK) -> Result<Self::Entity, CrudError>;
+    async fn read(pk: Self::PK, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
 }
 
 /// Updates an entity in the database
@@ -63,13 +65,17 @@ pub trait DieselCrudRead {
 /// - `Update` - The type to update
 /// # Parameters
 /// - `update` - The update to apply
+/// - `conn` - The database connection
 /// # Returns
-/// A result containing the number of rows updated or a `CrudError`.
+/// A result containing the old entry of the entity if successful or a `CrudError`.
 /// If the entity is not found, the error should be `CrudError::NotFound`.
 #[async_trait]
-pub trait DieselCrudUpdate {
+pub trait DieselCrudUpdate
+where
+    Self: Sized,
+{
     type Update: AsChangeset;
-    async fn update(&self, update: Self::Update) -> Result<usize, CrudError>;
+    async fn update(update: Self::Update, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
 }
 
 /// Deletes an entity from the database
@@ -79,24 +85,30 @@ pub trait DieselCrudUpdate {
 /// - `PK` - The primary key of the entity
 /// # Parameters
 /// - `pk` - The primary key of the entity
+/// - `conn` - The database connection
 /// # Returns
-/// A result containing the number of rows deleted or a `CrudError`.
+/// A result containing the deleted entity or a `CrudError`.
 /// If the entity is not found, the error should be `CrudError::NotFound`.
 #[async_trait]
-pub trait DieselCrudDelete {
+pub trait DieselCrudDelete
+where
+    Self: Sized,
+{
     type PK;
-    async fn delete(&self, pk: &Self::PK) -> Result<usize, CrudError>;
+    async fn delete(pk: Self::PK, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
 }
 
 /// Lists all entities in the table
 ///
 /// Implementing the trait requires the `async_trait` macro.
-/// # Associations
-/// - `Entity` - The type that will be returned in a Vec
+/// # Parameters
+/// - `conn` - The database connection
 /// # Returns
 /// A result containing a Vec of entities or a `CrudError`.
 #[async_trait]
-pub trait DieselCrudList {
-    type Entity;
-    async fn list(&self) -> Result<Vec<Self::Entity>, CrudError>;
+pub trait DieselCrudList
+where
+    Self: Sized,
+{
+    async fn list(conn: &mut AsyncPgConnection) -> Result<Vec<Self>, CrudError>;
 }

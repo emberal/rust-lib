@@ -1,49 +1,35 @@
-use crate::{common, StructAttributes};
-use proc_macro2::Ident;
+use crate::{common, Attributes};
 use quote::quote;
-use syn::Expr;
 
 pub(crate) fn derive_diesel_crud_create_impl(
-    StructAttributes {
+    Attributes {
+        struct_ident,
         table,
-        entity,
-        create,
+        insert,
         ..
-    }: &StructAttributes,
-    identifier: &Ident,
+    }: &Attributes,
 ) -> proc_macro2::TokenStream {
-    let body = function_body(table);
-    let return_type = common::return_type(quote! { Self::Entity });
+    let return_type = common::return_type(quote! { Self });
 
     quote! {
         #[automatically_derived]
-        impl<'insertable, 'entity> lib::diesel_crud_trait::DieselCrudCreate<'insertable, 'entity, #table::table> for #identifier
-            where
-                'entity: 'insertable,
-        {
-            type Create = #create;
-            type Entity = #entity;
-            fn create<'a, 'b>(&'a self, create: &'insertable Self::Create) -> #return_type
+        impl lib::diesel_crud_trait::DieselCrudCreate<#table::table> for #struct_ident {
+            type Insert = #insert;
+            fn create<'a, 'b>(insert: Self::Insert, conn: &'a mut diesel_async::AsyncPgConnection) -> #return_type
                 where
-                    Self: Sync + 'a,
+                    Self: Sized + Sync + 'a,
                     'a: 'b,
-                    'insertable: 'b
             {
                 Box::pin(async move {
-                    #body
+                    use diesel::associations::HasTable;
+                    diesel_async::RunQueryDsl::get_result(
+                        diesel::dsl::insert_into(#table::table::table()).values(insert),
+                        conn
+                    )
+                        .await
+                        .map_err(Into::into)
                 })
             }
         }
     }
-}
-
-fn function_body(table: &Expr) -> proc_macro2::TokenStream {
-    common::function_body(quote! {
-        diesel_async::RunQueryDsl::get_result(
-            diesel::dsl::insert_into(#table::table::table()).values(create),
-            &mut connection
-        )
-            .await
-            .map_err(Into::into)
-    })
 }

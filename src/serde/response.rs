@@ -16,6 +16,7 @@ impl<T: Serialize> BaseResponse<T> {
     }
 }
 
+// TODO version should reference the version in caller's Cargo.toml
 #[macro_export]
 macro_rules! from {
     ($body:expr) => {

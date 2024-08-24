@@ -10,3 +10,7 @@ homepage.workspace = true
 diesel = { workspace = true }
 diesel-async = { workspace = true }
 lib = { path = "../../../lib", features = ["diesel", "derive"] }
+
+[dev-dependencies]
+tokio = { version = "1.39", features = ["macros"] }
+dotenvy_macro = "0.15"
