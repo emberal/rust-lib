@@ -9,6 +9,6 @@ pub(crate) struct PrimaryKey {
 
 pub(crate) fn return_type(output: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
     quote! {
-        std::pin::Pin<Box<dyn core::future::Future<Output = Result<#output, lib::diesel_crud_trait::CrudError>> + Send + 'b>>
+        std::pin::Pin<Box<dyn core::future::Future<Output = Result<#output, lib::diesel_crud_trait::CrudError>> + Send + 'async_trait>>
     }
 }

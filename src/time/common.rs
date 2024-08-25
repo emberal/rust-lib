@@ -20,7 +20,7 @@ impl DateTimeInterval {
     /// # Examples
     /// ```
     /// use chrono::{NaiveDateTime, Duration, Utc};
-    /// use lib::time::common::DateTimeInterval;
+    /// use lib::time::DateTimeInterval;
     ///
     /// let start = Utc::now().naive_utc();
     /// let end = start + Duration::days(1);
@@ -30,7 +30,7 @@ impl DateTimeInterval {
     /// Illegal interval:
     /// ```
     /// use chrono::{NaiveDateTime, Utc};
-    /// use lib::time::common::DateTimeInterval;
+    /// use lib::time::DateTimeInterval;
     /// let start = Utc::now().naive_utc();
     /// let end = start;
     /// let interval = DateTimeInterval::new_safe(start, end);

@@ -34,7 +34,11 @@ where
     Self: Sized,
 {
     type Insert: Insertable<Table>;
-    async fn create(insert: Self::Insert, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
+    async fn insert(insert: Self::Insert, conn: &mut AsyncPgConnection) -> Result<Self, CrudError>;
+    async fn insert_many(
+        insert: &[Self::Insert],
+        conn: &mut AsyncPgConnection,
+    ) -> Result<Vec<Self>, CrudError>;
 }
 
 /// Gets an entity from the database

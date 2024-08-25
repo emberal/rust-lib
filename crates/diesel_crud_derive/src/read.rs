@@ -20,10 +20,10 @@ pub(crate) fn derive_diesel_crud_read_impl(
         #[automatically_derived]
         impl lib::diesel_crud_trait::DieselCrudRead for #struct_ident {
             type PK = #pk_type;
-            fn read<'a, 'b>(pk: Self::PK, conn: &'a mut diesel_async::AsyncPgConnection) -> #return_type
+            fn read<'a, 'async_trait>(pk: Self::PK, conn: &'a mut diesel_async::AsyncPgConnection) -> #return_type
                 where
                     Self: Sized + Sync + 'a,
-                    'a: 'b
+                    'a: 'async_trait
             {
                 Box::pin(async move {
                     use diesel::associations::HasTable;

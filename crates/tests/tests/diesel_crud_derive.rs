@@ -42,7 +42,7 @@ async fn test_insert_user() {
     let database_url = dotenv!("DATABASE_URL");
     let mut conn = AsyncPgConnection::establish(database_url).await.unwrap();
     conn.begin_test_transaction().await.unwrap();
-    let _user = User::create(
+    let _user = User::insert(
         InsertUser {
             email: "test".to_string(),
         },
