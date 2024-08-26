@@ -29,11 +29,27 @@ macro_rules! router {
             $body
         }
     };
+    ($body:expr; $state:ident: $($bound:tt),*) => {
+        pub fn router<$state: $($bound+)* 'static>() -> axum::Router<$state> {
+            $body
+        }
+    };
+    ($body:expr; $generic:ident: $($bound:tt),* -> $state:ty) => {
+        pub fn router<$generic: $($bound+)* 'static>() -> axum::Router<$state<$generic>> {
+            $body
+        }
+    };
     ($route:expr, $router:expr) => {
         router!(axum::Router::new().nest($route, $router));
     };
     ($route:expr, $router:expr, $state:ty) => {
         router!(axum::Router::new().nest($route, $router); $state);
+    };
+    ($route:expr, $router:expr, $state:ident: $($bound:tt),*) => {
+        router!(axum::Router::new().nest($route, $router); $state: $($bound),*);
+    };
+      ($route:expr, $router:expr, $generic:ident: $($bound:tt),* -> $state:ty) => {
+        router!(axum::Router::new().nest($route, $router); $generic: $($bound),* -> $state);
     };
     ($($method:ident $route:expr => $func:expr),* $(,)?) => {
         router!($crate::routes!($($method $route => $func),*));
@@ -109,6 +125,18 @@ mod tests {
                 get "/table/:exp" => |_state: State<String>| async {}
             ),
             String
+        );
+    }
+
+    #[test]
+    fn test_nested_router_with_generic_state() {
+        router!(
+            "/simplify",
+            routes!(
+                get "/:exp" => || async {},
+                get "/table/:exp" => |_state: State<T>| async {}
+            ),
+            T: Clone, Send, Sync
         );
     }
 

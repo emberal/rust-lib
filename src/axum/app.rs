@@ -44,6 +44,13 @@ impl AppBuilder {
         Self::default()
     }
 
+    pub fn from_router(router: Router) -> Self {
+        Self {
+            router,
+            ..Self::default()
+        }
+    }
+
     pub fn route(mut self, route: Router) -> Self {
         self.router = self.router.merge(route);
         self
@@ -106,6 +113,23 @@ impl AppBuilder {
         self
     }
 
+    /// Creates the app with the given options.
+    /// This method is useful for testing purposes.
+    /// Options used for configuring the listener will be lost.
+    pub fn build(self) -> Router {
+        let mut app = self.router;
+        if let Some(cors) = self.cors {
+            app = app.layer(cors);
+        }
+        app.layer(
+            self.tracing.unwrap_or(
+                TraceLayer::new_for_http()
+                    .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                    .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
+            ),
+        )
+    }
+
     /// Build the app and start the server
     /// # Default Options
     /// - IP == 0.0.0.0
@@ -118,10 +142,10 @@ impl AppBuilder {
         let listener = self.listener().await?;
 
         if self.normalize_path.unwrap_or(true) {
-            let app = NormalizePathLayer::trim_trailing_slash().layer(self.create_app());
+            let app = NormalizePathLayer::trim_trailing_slash().layer(self.build());
             axum::serve(listener, ServiceExt::<Request>::into_make_service(app)).await?;
         } else {
-            let app = self.create_app();
+            let app = self.build();
             axum::serve(listener, app.into_make_service()).await?;
         };
         Ok(())
@@ -131,20 +155,6 @@ impl AppBuilder {
         let addr = SocketAddr::from(self.socket.unwrap_or((Ipv4Addr::UNSPECIFIED.into(), 8000)));
         info!("Initializing server on: {addr}");
         TcpListener::bind(&addr).await
-    }
-
-    fn create_app(self) -> Router {
-        let mut app = self.router;
-        if let Some(cors) = self.cors {
-            app = app.layer(cors);
-        }
-        app.layer(
-            self.tracing.unwrap_or(
-                TraceLayer::new_for_http()
-                    .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
-                    .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
-            ),
-        )
     }
 }
 
