@@ -6,57 +6,22 @@ use axum::{
     },
     response::IntoResponse,
 };
+use mime::Mime;
+use std::str::FromStr;
 use thiserror::Error;
-
-#[derive(PartialEq, Eq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
-pub enum ContentType {
-    Json,
-    Form,
-    Multipart,
-    Pdf,
-    Html,
-    Unknown,
-}
-
-impl From<&str> for ContentType {
-    fn from(content_type: &str) -> Self {
-        match content_type {
-            "application/json" => ContentType::Json,
-            "application/x-www-form-urlencoded" => ContentType::Form,
-            "multipart/form-data" => ContentType::Multipart,
-            "application/pdf" => ContentType::Pdf,
-            "text/html" => ContentType::Html,
-            _ => ContentType::Unknown,
-        }
-    }
-}
-
-impl From<String> for ContentType {
-    fn from(content_type: String) -> Self {
-        ContentType::from(content_type.as_str())
-    }
-}
-
-impl From<Option<&str>> for ContentType {
-    fn from(content_type: Option<&str>) -> Self {
-        content_type
-            .map(ContentType::from)
-            .unwrap_or(ContentType::Unknown)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct File {
     pub filename: String,
     pub bytes: Vec<u8>,
-    pub content_type: ContentType,
+    pub content_type: Mime,
 }
 
 impl File {
     pub fn new(
         filename: impl Into<String>,
         bytes: impl Into<Vec<u8>>,
-        content_type: impl Into<ContentType>,
+        content_type: impl Into<Mime>,
     ) -> Self {
         Self {
             filename: filename.into(),
@@ -70,7 +35,9 @@ impl File {
             .file_name()
             .ok_or(MultipartFileRejection::MissingFilename)?
             .to_string();
-        let content_type: ContentType = field.content_type().into();
+        let content_type = Mime::from_str(field.content_type().ok_or_else(|| {
+            MultipartFileRejection::FieldError("Missing or illegal content type".to_string())
+        })?)?;
         let bytes = field.bytes().await?;
         Ok(File::new(filename, bytes, content_type))
     }
@@ -93,6 +60,8 @@ pub enum MultipartFileRejection {
     MultipartRejection(#[from] MultipartRejection),
     #[error("Field error: {0}")]
     FieldError(String),
+    #[error(transparent)]
+    FromStrError(#[from] mime::FromStrError),
     #[error("No files found")]
     NoFiles,
     #[error("Expected one file, got several")]
@@ -129,6 +98,9 @@ impl IntoResponse for MultipartFileRejection {
             }
             MultipartFileRejection::BodyError(error) => {
                 (axum::http::StatusCode::BAD_REQUEST, error).into_response()
+            }
+            MultipartFileRejection::FromStrError(error) => {
+                (axum::http::StatusCode::BAD_REQUEST, error.to_string()).into_response()
             }
         }
     }

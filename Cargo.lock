@@ -805,6 +805,7 @@ dependencies = [
  "diesel-crud-derive",
  "diesel-crud-trait",
  "into-response-derive",
+ "mime",
  "nom",
  "read-files",
  "serde",

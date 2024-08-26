@@ -310,6 +310,7 @@ version = "1.4.3"
 dependencies = [
  "axum",
  "derive_more",
+ "mime",
  "thiserror",
  "tokio",
  "tower 0.5.0",

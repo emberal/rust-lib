@@ -24,6 +24,7 @@ homepage = { workspace = true }
 axum = { version = "0.7", optional = true, features = ["multipart"] }
 tower = { version = "0.5", optional = true }
 tower-http = { version = "0.5", optional = true, features = ["trace", "cors", "normalize-path"] }
+mime = { version = "0.3.17", optional = true }
 # Async
 tokio = { version = "1.39", optional = true, features = ["fs"] }
 tokio-util = { version = "0.7", optional = true, features = ["io"] }
@@ -57,7 +58,7 @@ diesel-async = "0.5"
 derive_more = "1.0"
 
 [features]
-axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber", "dep:tokio"]
+axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber", "dep:tokio", "dep:mime"]
 diesel = ["dep:diesel-crud-trait"]
 io = ["dep:tokio", "dep:tokio-util"]
 iter = []
