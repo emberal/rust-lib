@@ -76,6 +76,7 @@ macro_rules! routes {
     };
 }
 
+/// Merges the given routers into a single router.
 #[macro_export]
 macro_rules! join_routes {
     ($($route:expr),* $(,)?) => {

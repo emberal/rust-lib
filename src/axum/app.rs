@@ -40,10 +40,13 @@ pub struct AppBuilder {
 }
 
 impl AppBuilder {
+    /// Creates a new app builder with default options.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates the builder from the given router.
+    /// Only the routes and layers will be used.
     pub fn from_router(router: Router) -> Self {
         Self {
             router,
@@ -51,11 +54,13 @@ impl AppBuilder {
         }
     }
 
+    /// Adds a route to the previously added routes
     pub fn route(mut self, route: Router) -> Self {
         self.router = self.router.merge(route);
         self
     }
 
+    /// Adds multiple routes to the previously added routes
     pub fn routes(mut self, routes: impl IntoIterator<Item = Router>) -> Self {
         self.router = routes.into_iter().fold(self.router, Router::merge);
         self
@@ -74,12 +79,14 @@ impl AppBuilder {
         self
     }
 
+    /// Sets the socket for the server.
     pub fn socket<IP: Into<IpAddr>>(mut self, socket: impl Into<(IP, u16)>) -> Self {
         let (ip, port) = socket.into();
         self.socket = Some((ip.into(), port));
         self
     }
 
+    /// Sets the port for the server.
     pub fn port(mut self, port: u16) -> Self {
         self.socket = if let Some((ip, _)) = self.socket {
             Some((ip, port))
@@ -89,6 +96,7 @@ impl AppBuilder {
         self
     }
 
+    /// Sets the fallback handler.
     pub fn fallback<H, T>(mut self, fallback: H) -> Self
     where
         H: Handler<T, ()>,
@@ -98,16 +106,19 @@ impl AppBuilder {
         self
     }
 
+    /// Sets the cors layer.
     pub fn cors(mut self, cors: CorsLayer) -> Self {
         self.cors = Some(cors);
         self
     }
 
+    /// Sets the normalize path option. Default is true.
     pub fn normalize_path(mut self, normalize_path: bool) -> Self {
         self.normalize_path = Some(normalize_path);
         self
     }
 
+    /// Sets the trace layer.
     pub fn tracing(mut self, tracing: TraceLayer<HttpMakeClassifier>) -> Self {
         self.tracing = Some(tracing);
         self
@@ -168,44 +179,37 @@ fn fmt_trace() -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use axum::Router;
-
     use super::*;
+    use axum::Router;
+    use std::time::Duration;
+    use tokio::time::sleep;
 
-    mod tokio_tests {
-        use std::time::Duration;
+    #[tokio::test]
+    async fn test_app_builder_serve() {
+        let handler = tokio::spawn(async {
+            AppBuilder::new().serve().await.unwrap();
+        });
+        sleep(Duration::from_millis(250)).await;
+        handler.abort();
+    }
 
-        use tokio::time::sleep;
-
-        use super::*;
-
-        #[tokio::test]
-        async fn test_app_builder_serve() {
-            let handler = tokio::spawn(async {
-                AppBuilder::new().serve().await.unwrap();
-            });
-            sleep(Duration::from_millis(250)).await;
-            handler.abort();
-        }
-
-        #[tokio::test]
-        async fn test_app_builder_all() {
-            let handler = tokio::spawn(async {
-                AppBuilder::new()
-                    .socket((Ipv4Addr::LOCALHOST, 8080))
-                    .routes([Router::new()])
-                    .fallback(|| async { "Fallback" })
-                    .cors(CorsLayer::new())
-                    .normalize_path(true)
-                    .tracing(TraceLayer::new_for_http())
-                    .layer(TraceLayer::new_for_http())
-                    .serve()
-                    .await
-                    .unwrap();
-            });
-            sleep(Duration::from_millis(250)).await;
-            handler.abort();
-        }
+    #[tokio::test]
+    async fn test_app_builder_all() {
+        let handler = tokio::spawn(async {
+            AppBuilder::new()
+                .socket((Ipv4Addr::LOCALHOST, 8080))
+                .routes([Router::new()])
+                .fallback(|| async { "Fallback" })
+                .cors(CorsLayer::new())
+                .normalize_path(true)
+                .tracing(TraceLayer::new_for_http())
+                .layer(TraceLayer::new_for_http())
+                .serve()
+                .await
+                .unwrap();
+        });
+        sleep(Duration::from_millis(250)).await;
+        handler.abort();
     }
 
     #[test]

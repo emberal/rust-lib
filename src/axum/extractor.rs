@@ -10,6 +10,7 @@ use mime::Mime;
 use std::str::FromStr;
 use thiserror::Error;
 
+/// A file extracted from a multipart request.
 #[derive(Debug, Clone, PartialEq)]
 pub struct File {
     pub filename: String,
@@ -18,6 +19,7 @@ pub struct File {
 }
 
 impl File {
+    /// Creates a new file with the given filename, bytes and content type.
     pub fn new(
         filename: impl Into<String>,
         bytes: impl Into<Vec<u8>>,
@@ -30,7 +32,8 @@ impl File {
         }
     }
 
-    async fn from_field(field: Field<'_>) -> Result<Self, MultipartFileRejection> {
+    /// Creates a new file from a field in a multipart request.
+    pub async fn from_field(field: Field<'_>) -> Result<Self, MultipartFileRejection> {
         let filename = field
             .file_name()
             .ok_or(MultipartFileRejection::MissingFilename)?
@@ -54,6 +57,7 @@ pub struct MultipartFile(pub File);
 #[derive(Debug, Clone, PartialEq)]
 pub struct MultipartFiles(pub Vec<File>);
 
+/// Rejection type for multipart file extractors.
 #[derive(Debug, Error)]
 pub enum MultipartFileRejection {
     #[error(transparent)]
@@ -113,6 +117,19 @@ where
 {
     type Rejection = MultipartFileRejection;
 
+    /// Extracts a single file from a multipart request.
+    /// Expects exactly one file. A file must have a name, bytes and optionally a content type.
+    /// This extractor consumes the request and must ble placed last in the handler.
+    /// # Example
+    /// ```
+    /// use std::str::from_utf8;
+    /// use axum::response::Html;
+    /// use lib::axum::extractor::MultipartFile;
+    ///
+    /// async fn upload_file(MultipartFile(file): MultipartFile) -> Html<String> {
+    ///     Html(String::from_utf8(file.bytes).unwrap())
+    /// }
+    /// ```
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let multipart = Multipart::from_request(req, state).await?;
         let files = get_files(multipart).await?;
@@ -132,6 +149,24 @@ where
 {
     type Rejection = MultipartFileRejection;
 
+    /// Extracts multiple files from a multipart request.
+    /// Expects at least one file. A file must have a name, bytes and optionally a content type.
+    /// This extractor consumes the request and must ble placed last in the handler.
+    /// # Example
+    /// ```
+    /// use axum::response::Html;
+    /// use lib::axum::extractor::MultipartFiles;
+    /// use std::str::from_utf8;
+    ///
+    /// async fn upload_files(MultipartFiles(files): MultipartFiles) -> Html<String> {
+    ///     let content = files
+    ///         .iter()
+    ///         .map(|file| String::from_utf8(file.bytes.clone()).unwrap())
+    ///         .collect::<Vec<String>>()
+    ///         .join("<br>");
+    ///     Html(content)
+    /// }
+    /// ```
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let multipart = Multipart::from_request(req, state).await?;
         let files = get_files(multipart).await?;

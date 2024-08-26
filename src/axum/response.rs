@@ -18,6 +18,7 @@ mod tests {
     use axum::http::header::CONTENT_TYPE;
     use axum::http::{HeaderValue, StatusCode};
     use axum::response::IntoResponse;
+    use mime::APPLICATION_JSON;
     use serde::Serialize;
 
     use crate::serde::response::BaseResponse;
@@ -39,7 +40,7 @@ mod tests {
         assert_eq!(json_response.status(), StatusCode::OK);
         assert_eq!(
             json_response.headers().get(CONTENT_TYPE),
-            Some(&HeaderValue::from_static("application/json"))
+            Some(&HeaderValue::from_static(APPLICATION_JSON.as_ref()))
         );
     }
 
