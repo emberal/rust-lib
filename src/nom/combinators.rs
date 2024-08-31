@@ -47,6 +47,29 @@ where
     take_while_m_n(n, n, predicate)
 }
 
+/// Parse the inner parser and then the end of the input.
+/// Very useful for ensuring that the entire input is consumed.
+/// - Parameters
+///     - `inner`: The parser to run
+/// - Returns: A parser that runs the inner parser and then the end of the input
+/// # Example
+/// ```
+/// use nom::bytes::complete::{tag};
+/// use lib::nom::combinators::exhausted;
+///
+/// let input = "test";
+/// let (remaining, result) = exhausted(tag("test"))(input).unwrap();
+/// assert_eq!(remaining, "");
+/// assert_eq!(result, "test");
+/// ```
+/// - Fails if the input is not exhausted
+/// ```
+/// use nom::bytes::complete::{tag};
+/// use lib::nom::combinators::exhausted;
+///
+/// let input = "test";
+/// assert!(exhausted(tag("tes"))(input).is_err());
+/// ```
 pub fn exhausted<'a, Parser, R>(inner: Parser) -> impl FnMut(&'a str) -> IResult<&'a str, R>
 where
     Parser: FnMut(&'a str) -> IResult<&'a str, R>,

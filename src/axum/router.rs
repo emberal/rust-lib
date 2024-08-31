@@ -77,6 +77,10 @@ macro_rules! routes {
 }
 
 /// Merges the given routers into a single router.
+/// # Examples
+/// ```
+/// let _: axum::Router<()> = lib::join_routes![axum::Router::new(), axum::Router::new()];
+/// ```
 #[macro_export]
 macro_rules! join_routes {
     ($($route:expr),* $(,)?) => {

@@ -1,4 +1,6 @@
+/// Modify self to contain only distinct elements.
 pub trait Distinct {
+    /// Modify self to contain only distinct elements.
     fn distinct(&mut self);
 }
 

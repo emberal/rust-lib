@@ -9,3 +9,7 @@ args = ["fmt", "--all"]
 [tasks.test]
 command = "cargo"
 args = ["test", "--all-features"]
+
+[tasks.coverage]
+command = "cargo"
+args = ["llvm-cov", "--all-features"]

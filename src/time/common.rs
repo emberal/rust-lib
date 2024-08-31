@@ -1,6 +1,8 @@
 use chrono::NaiveDateTime;
 use derive_more::{Constructor, From};
 
+/// Represents a date-time interval using naive date-time.
+/// All date-times are expected to be in UTC.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Constructor, From)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DateTimeInterval {
