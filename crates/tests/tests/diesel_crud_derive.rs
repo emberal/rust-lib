@@ -1,10 +1,12 @@
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
-use diesel_async::{AsyncConnection, AsyncPgConnection};
-use dotenvy_macro::dotenv;
 use lib::diesel_crud_derive::{
     DieselCrudCreate, DieselCrudDelete, DieselCrudList, DieselCrudRead, DieselCrudUpdate,
 };
 use lib::diesel_crud_trait::DieselCrudCreate;
+use test_containers::create_test_containers_pool;
+
+#[cfg(test)]
+pub mod test_containers;
 
 diesel::table! {
     user (email) {
@@ -14,6 +16,8 @@ diesel::table! {
 }
 
 #[derive(
+    Debug,
+    PartialEq,
     Queryable,
     Selectable,
     Insertable,
@@ -39,14 +43,19 @@ struct InsertUser {
 
 #[tokio::test]
 async fn test_insert_user() {
-    let database_url = dotenv!("DATABASE_URL");
-    let mut conn = AsyncPgConnection::establish(database_url).await.unwrap();
-    conn.begin_test_transaction().await.unwrap();
-    let _user = User::insert(
+    let container = create_test_containers_pool().await.unwrap();
+    let mut conn = container.pool.get().await.unwrap();
+    let user = User::insert(
         InsertUser {
             email: "test".to_string(),
         },
         &mut conn,
     )
     .await;
+    assert_eq!(
+        user,
+        Ok(User {
+            email: "test".to_string()
+        })
+    );
 }

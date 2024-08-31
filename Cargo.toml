@@ -26,13 +26,16 @@ tower = { version = "0.5", optional = true }
 tower-http = { version = "0.5", optional = true, features = ["trace", "cors", "normalize-path"] }
 mime = { version = "0.3", optional = true }
 # Async
-tokio = { version = "1.39", optional = true, features = ["fs"] }
+tokio = { workspace = true, optional = true, features = ["fs", "rt-multi-thread"] }
 tokio-util = { version = "0.7", optional = true, features = ["io"] }
 # Database
+diesel = { workspace = true, optional = true, features = ["postgres"] }
+diesel-async = { workspace = true, optional = true, features = ["postgres", "deadpool"] }
 diesel-crud-derive = { path = "crates/diesel_crud_derive", optional = true }
 diesel-crud-trait = { path = "crates/diesel_crud_trait", optional = true }
+deadpool-diesel = { workspace = true, optional = true, features = ["postgres"] }
 # Error handling
-thiserror = { version = "1.0", optional = true }
+thiserror = { workspace = true, optional = true }
 # Logging
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
@@ -49,17 +52,25 @@ chrono = { version = "0.4", optional = true, features = ["serde"] }
 derive_more = { workspace = true, features = ["from", "constructor"] }
 
 [workspace.dependencies]
+# Async
+tokio = "1.40"
+# Database
+diesel = "2.2"
+diesel-async = "0.5"
+deadpool-diesel = "0.6"
+# Error handling
+thiserror = "1.0"
+# Procedural macros
 syn = "2.0"
 quote = "1.0"
 deluxe = "0.5"
 proc-macro2 = "1.0"
-diesel = "2.2"
-diesel-async = "0.5"
+# Utils
 derive_more = "1.0"
 
 [features]
 axum = ["dep:axum", "dep:tower", "dep:tower-http", "dep:thiserror", "dep:tracing", "dep:tracing-subscriber", "dep:tokio", "dep:mime"]
-diesel = ["dep:diesel-crud-trait"]
+diesel = ["dep:diesel-crud-trait", "dep:diesel", "dep:diesel-async", "dep:deadpool-diesel"]
 io = ["dep:tokio", "dep:tokio-util"]
 iter = []
 nom = ["dep:nom"]

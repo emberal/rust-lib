@@ -10,7 +10,11 @@ homepage.workspace = true
 diesel = { workspace = true }
 diesel-async = { workspace = true }
 lib = { path = "../../../lib", features = ["diesel", "derive"] }
+derive_more = { workspace = true, features = ["constructor", "from"] }
+thiserror = { workspace = true }
 
 [dev-dependencies]
-tokio = { version = "1.39", features = ["macros"] }
+tokio = { workspace = true, features = ["macros"] }
 dotenvy_macro = "0.15"
+testcontainers-modules = { version = "0.9", features = ["postgres"] }
+diesel_async_migrations = "0.14"

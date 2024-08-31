@@ -1,6 +1,4 @@
 #![allow(dead_code)]
-extern crate self as lib;
-
 #[cfg(all(feature = "derive", feature = "diesel"))]
 pub extern crate diesel_crud_derive;
 #[cfg(feature = "diesel")]
@@ -9,9 +7,12 @@ pub extern crate diesel_crud_trait;
 pub extern crate into_response_derive;
 #[cfg(feature = "read-files")]
 pub extern crate read_files;
+extern crate self as lib;
 
 #[cfg(feature = "axum")]
 pub mod axum;
+#[cfg(feature = "diesel")]
+pub mod diesel;
 #[cfg(feature = "io")]
 pub mod io;
 #[cfg(feature = "nom")]
